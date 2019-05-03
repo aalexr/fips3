@@ -145,7 +145,10 @@ void OpenGLWidget::initializeGLObjects() {
 	viewrect_.setBorder(plan_->plane().borderRect(rotation()));
 	widget_to_fits_.setScale(plan_->plane().scale());
 	widget_to_fits_.setImageSize(image_size());
-	fits_to_wcs_.setWcsMatrix(WcsData(hdu_->header()).matrix());
+	
+	WcsData wcs = WcsData(hdu_->header());
+	setRotation(wcs.rotationAngle());
+	fits_to_wcs_.setWcsMatrix(wcs.matrix());
 
 	emit planInitialized(*plan_);
 

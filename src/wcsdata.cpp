@@ -43,3 +43,8 @@ WcsData::WcsData(const FITS::HeaderUnit& unit) : matrix_{} {
 const QMatrix4x4& WcsData::matrix() const noexcept {
 	return matrix_;
 }
+
+float WcsData::rotationAngle() const noexcept {
+	const float* f = matrix_.constData();
+	return atan(f[5] / f[0]) * 180 / 3.14159265f;
+}

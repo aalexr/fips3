@@ -5,6 +5,7 @@
 #include <QString>
 
 #include <array>
+#include <cmath>
 
 #include <fits.h>
 
@@ -15,6 +16,7 @@ public:
 	~WcsData() = default;
 
 	const QMatrix4x4& matrix() const noexcept;
+	float rotationAngle() const noexcept;
 
 private:
 	QMatrix4x4 matrix_;
