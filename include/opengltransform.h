@@ -42,7 +42,7 @@ public:
 	};
 	const QMatrix4x4& transformMatrix() const override;
 
-	const float& rotation() const { return angle_; }
+	float rotation() const { return angle_; }
 	void setRotation(float angle);
 
 	const QRectF& viewrect() const { return viewrect_; }

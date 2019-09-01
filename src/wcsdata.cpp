@@ -1,43 +1,40 @@
 #include "wcsdata.h"
 
 WcsData::WcsData(const FITS::HeaderUnit& unit) : matrix_{} {
-	try {
-		if (unit.count("NAXIS") > 0)
-			if (unit.header("NAXIS") == "2") {
-				std::array<float, 4> m{};
-                const std::array<float, 2> ref_px{ unit.header_as<float>("CRPIX1"), unit.header_as<float>("CRPIX2") };
-				if (unit.count("CD1_1") > 0 && unit.count("CD1_2") > 0 &&
-					unit.count("CD2_1") > 0 && unit.count("CD2_2") > 0) {
-					m.at(0) = unit.header_as<float>("CD1_1");
-					m.at(1) = unit.header_as<float>("CD1_2");
-					m.at(2) = unit.header_as<float>("CD2_1");
-					m.at(3) = unit.header_as<float>("CD2_2");
-				}
-				else if (unit.count("PC1_1") > 0 && unit.count("PC1_2") > 0 &&
-					unit.count("PC2_1") > 0 && unit.count("PC2_2") > 0) {
-                    const std::array<float, 2> c_delt{ unit.header_as<float>("CDELT1"), unit.header_as<float>("CDELT2") };
+    try {
+        float m11, m12, m21, m22;
+        auto ref_px_x = unit.header_as<float>("CRPIX1");
+        auto ref_px_y = unit.header_as<float>("CRPIX2");
 
-					m.at(0) = unit.header_as<float>("PC1_1") * c_delt.at(0);
-					m.at(1) = unit.header_as<float>("PC1_2") * c_delt.at(0);
-					m.at(2) = unit.header_as<float>("PC2_1") * c_delt.at(1);
-					m.at(3) = unit.header_as<float>("PC2_2") * c_delt.at(1);
-				}
-				else FITS::Exception("WCS data is not present or unsupported. Using identity transformation.").raise();
+        if (unit.count("CD1_1") > 0 && unit.count("CD1_2") > 0 &&
+            unit.count("CD2_1") > 0 && unit.count("CD2_2") > 0) {
+            m11 = unit.header_as<float>("CD1_1");
+            m12 = unit.header_as<float>("CD1_2");
+            m21 = unit.header_as<float>("CD2_1");
+            m22 = unit.header_as<float>("CD2_2");
+        } else if (unit.count("PC1_1") > 0 && unit.count("PC1_2") > 0 &&
+                   unit.count("PC2_1") > 0 && unit.count("PC2_2") > 0) {
 
-				matrix_ = QMatrix4x4
-				{  
-					m.at(0), m.at(1), 0.f, unit.header_as<float>("CRVAL1") - (m.at(0) * ref_px.at(0) + m.at(1) * ref_px.at(1)),
-                    m.at(2), m.at(3), 0.f, unit.header_as<float>("CRVAL2") - (m.at(2) * ref_px.at(0) + m.at(3) * ref_px.at(1)),
-					0.f, 0.f, 0.f, 0.f,
-					0.f, 0.f, 0.f, 1.f
-				};
-			}
-			else qDebug() << "Only two dimensional transformation is supported. Using identity transformation.";
-		else qDebug() << "Number of axes is not present. Using identity transformation.";
-	}
-	catch (std::exception& e) {
-		qDebug() << "Error occurred during processing WCS data. See details: " << e.what();
-	}
+            auto c_delt1 = unit.header_as<float>("CDELT1");
+            auto c_delt2 = unit.header_as<float>("CDELT2");
+
+            m11 = unit.header_as<float>("PC1_1") * c_delt1;
+            m12 = unit.header_as<float>("PC1_2") * c_delt1;
+            m21 = unit.header_as<float>("PC2_1") * c_delt2;
+            m22 = unit.header_as<float>("PC2_2") * c_delt2;
+        } else throw FITS::Exception("WCS data is not present or unsupported. Using identity transformation.");
+
+        matrix_ = QMatrix4x4
+                {
+                        m11, m12, 0.f, unit.header_as<float>("CRVAL1") - (m11 * ref_px_x + m12 * ref_px_y),
+                        m21, m22, 0.f, unit.header_as<float>("CRVAL2") - (m21 * ref_px_x + m22 * ref_px_y),
+                        0.f, 0.f, 1.f, 0.f,
+                        0.f, 0.f, 0.f, 1.f
+                };
+    }
+    catch (std::exception& e) {
+        qDebug() << "Error occurred during processing WCS data. See details: " << e.what();
+    }
 }
 
 const QMatrix4x4& WcsData::matrix() const noexcept {
@@ -45,6 +42,8 @@ const QMatrix4x4& WcsData::matrix() const noexcept {
 }
 
 float WcsData::rotationAngle() const noexcept {
+	if (matrix_.isIdentity())
+		return 0.f;
 	const float* f = matrix_.constData();
-	return atan(f[5] / f[0]) * 180 / 3.14159265f;
+	return static_cast<int>(atan(f[5] / f[0]) * 180 / 3.14159265f);
 }

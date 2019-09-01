@@ -25,6 +25,8 @@
 
 OpenGLPlane::OpenGLPlane(const QSize& image_size, QObject* parent):
 	QObject(parent),
+	scale_{0},
+	vertices_{},
 	vertex_buffer_(QOpenGLBuffer::VertexBuffer),
 	UV_buffer_(QOpenGLBuffer::VertexBuffer) {
 
