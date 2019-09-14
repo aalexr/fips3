@@ -19,16 +19,21 @@
 #ifndef _ROTATIONWIDGET_H
 #define _ROTATIONWIDGET_H
 
+#include <memory>
+
 #include <QWidget>
+#include <QCheckBox>
 
 #include <spinboxwithslider.h>
 
 class RotationWidget: public QWidget {
 private:
 	SpinboxWithSlider* spinbox_with_slider_;
+	std::unique_ptr<QCheckBox> wcs_checkBox_;
 public:
 	explicit RotationWidget(QWidget *parent = Q_NULLPTR);
 	inline ScientificSpinBox* spinbox() { return spinbox_with_slider_->spinbox(); }
+	inline const QCheckBox* wcsCheckBox() const { return wcs_checkBox_.get(); }
 };
 
 #endif //_ROTATIONWIDGET_H

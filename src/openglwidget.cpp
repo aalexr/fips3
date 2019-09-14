@@ -145,10 +145,11 @@ void OpenGLWidget::initializeGLObjects() {
 	viewrect_.setBorder(plan_->plane().borderRect(rotation()));
 	widget_to_fits_.setScale(plan_->plane().scale());
 	widget_to_fits_.setImageSize(image_size());
+	fits_to_wcs_.setWcs(WcsData{ hdu_->header() });
 	
-	WcsData wcs = WcsData(hdu_->header());
-	setRotation(wcs.rotationAngle());
-	fits_to_wcs_.setWcsMatrix(wcs.matrix());
+	emit wcsSupported(fits_to_wcs_.wcs().isUsingWcs());
+	
+	setRotation(fits_to_wcs_.wcs().rotationAngle());
 
 	emit planInitialized(*plan_);
 
@@ -238,10 +239,9 @@ Pixel OpenGLWidget::pixelFromWidgetCoordinate(const QPoint &widget_coord) {
 	}
 
 	const auto wcs_vector = fits_to_wcs_.transform(p);
-    qDebug() << wcs_vector.x() << " " << wcs_vector.y();
-	const QPoint wcs_position(wcs_vector.x(), wcs_vector.y());
-	const auto value = hdu_->header().bscale() * hdu_->data().apply(HDUValueGetter{position}) + hdu_->header().bzero();
-	return Pixel(wcs_position, value);
+	const auto& header = hdu_->header();
+	const auto value = header.bscale() * hdu_->data().apply(HDUValueGetter{position}) + header.bzero();
+	return Pixel(QPoint{(int)wcs_vector.x(), (int)wcs_vector.y()}, value);
 }
 
 void OpenGLWidget::viewChanged(const QRectF& view_rect) {
@@ -311,4 +311,8 @@ void OpenGLWidget::setVerticalFlip(bool flip) {
 const QString& OpenGLWidget::planName() const {
 	static const QString none("(none)");
 	return (plan_ ? plan_->name() : none);
+}
+
+void OpenGLWidget::setUseWcs(int state) {
+	fits_to_wcs_.toogleWcs(state == Qt::CheckState::Checked);
 }

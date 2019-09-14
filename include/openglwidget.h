@@ -158,10 +158,12 @@ public slots:
 	void setRotation(double angle);
 	void setHorizontalFlip(bool flip);
 	void setVerticalFlip(bool flip);
+	void setUseWcs(int state);
 signals:
 	void rotationChanged(double angle);
 	void horizontalFlipChanged(bool flip);
 	void verticalFlipChanged(bool flip);
+	void wcsSupported(bool yes);
 
 private:
 	std::unique_ptr<OpenGLShaderUniforms> shader_uniforms_;

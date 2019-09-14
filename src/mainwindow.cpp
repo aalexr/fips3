@@ -79,9 +79,8 @@ bool MainWindowState::setWatch(bool watch) {
 
 	if (watch) {
 		return watcher_->addPath(filename_);
-	} else {
-		return watcher_->removePath(filename_);
 	}
+	return watcher_->removePath(filename_);
 }
 void MainWindowState::fileChanged(const QString& path) {
 	Q_ASSERT(path == filename_);
@@ -196,6 +195,18 @@ MainWindow::MainWindow(const QString& fits_filename, QWidget *parent):
 			rotation_widget->spinbox(), SIGNAL(valueChanged(double)),
 			scrollZoomArea()->viewport(), SLOT(setRotation(double))
 	);
+	connect(
+			rotation_widget->wcsCheckBox(), SIGNAL(stateChanged(int)),
+			scrollZoomArea()->viewport(), SLOT(setUseWcs(int))
+	);
+	connect(
+			scrollZoomArea()->viewport(), SIGNAL(wcsSupported(bool)),
+			rotation_widget->wcsCheckBox(), SLOT(setEnabled(bool))
+	);
+	connect(
+		scrollZoomArea()->viewport(), SIGNAL(wcsSupported(bool)),
+		rotation_widget->wcsCheckBox(), SLOT(setChecked(bool))
+	);
 	rotation_dock->setWidget(rotation_widget.release());
 	addDockWidget(Qt::RightDockWidgetArea, rotation_dock.release());
 
@@ -292,10 +303,11 @@ void MainWindow::viewHeaders() {
 	table->setEditTriggers(QTableWidget::NoEditTriggers);
 	table->horizontalHeader()->setStretchLastSection(true);
 
-	auto iter = header_unit.cbegin();
-	for (int i = 0; i < table->rowCount() && iter != header_unit.cend(); ++i, ++iter) {
-		table->setItem(i, 0, new QTableWidgetItem(iter->first));
-		table->setItem(i, 1, new QTableWidgetItem(iter->second));
+	int rowIndex = 0;
+	for (auto&& header : header_unit) {
+		table->setItem(rowIndex, 0, new QTableWidgetItem(header.first));
+		table->setItem(rowIndex, 1, new QTableWidgetItem(header.second));
+		++rowIndex;
 	}
 
 	auto layout = new QBoxLayout(QBoxLayout::LeftToRight, headers_dialog.get());

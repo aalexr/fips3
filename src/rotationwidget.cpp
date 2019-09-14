@@ -25,11 +25,13 @@
 
 RotationWidget::RotationWidget(QWidget* parent):
 	QWidget(parent),
-	spinbox_with_slider_(new SpinboxWithSlider(Qt::Horizontal, this)) {
+	spinbox_with_slider_(new SpinboxWithSlider(Qt::Horizontal, this)),
+	wcs_checkBox_{new QCheckBox("Use WCS", this)} {
 
 	std::unique_ptr<QGridLayout> widget_layout{new QGridLayout(this)};
 	widget_layout->addWidget(spinbox_with_slider_, 0, 0);
 	widget_layout->addWidget(new QLabel(tr("Deg"), this), 0, 1);
+	widget_layout->addWidget(wcs_checkBox_.get(), 1, 0);
 	widget_layout->setRowStretch(1, 1);
 	setLayout(widget_layout.release());
 

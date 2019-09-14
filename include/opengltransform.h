@@ -20,6 +20,7 @@
 #define _OPENGLTRANSFORM_H
 
 #include <abstractopengltransform.h>
+#include <include\wcsdata.h>
 
 class OpenGLTransform:
 	public AbstractOpenGLTransform {
@@ -80,16 +81,17 @@ public:
 class FitsToWCSOpenGLTransform:
 	public AbstractOpenGLTransform {
 private:
-	QMatrix4x4 wcs_matrix_;
+	WcsData wcs_;
 protected:
-	const QMatrix4x4& transformMatrix() const override { return wcs_matrix_; }
+	const QMatrix4x4& transformMatrix() const override { return wcs_.matrix(); }
 public:
-	explicit FitsToWCSOpenGLTransform(QObject *parent = Q_NULLPTR):
-		AbstractOpenGLTransform{parent}, wcs_matrix_{} {}
-	FitsToWCSOpenGLTransform(const QMatrix4x4& wcs, QObject* parent = Q_NULLPTR):
-		AbstractOpenGLTransform{parent}, wcs_matrix_{wcs} {}
-	// const QMatrix4x4& wcsMatrix() const { return wcs_matrix_; }
-	void setWcsMatrix(const QMatrix4x4& matrix);
+	explicit FitsToWCSOpenGLTransform(QObject* parent = Q_NULLPTR) :
+		AbstractOpenGLTransform{ parent } {}
+	FitsToWCSOpenGLTransform(const FITS::HeaderUnit& hdu, QObject *parent = Q_NULLPTR):
+		AbstractOpenGLTransform{parent}, wcs_{hdu} {}
+	const WcsData& wcs() const { return wcs_; }
+	void setWcs(WcsData wcs) { wcs_ = std::move(wcs); }
+	void toogleWcs(bool use);
 };
 
 #endif // _OPENGLTRANSFORM_H

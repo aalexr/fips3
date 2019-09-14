@@ -146,8 +146,7 @@ void WidgetToFitsOpenGLTransform::setWidgetSize(const QSize& widget_size) {
 	expired_ = true;
 }
 
-void FitsToWCSOpenGLTransform::setWcsMatrix(const QMatrix4x4& matrix) {
-	if (wcs_matrix_ == matrix) return;
-	
-	wcs_matrix_ = matrix;
+void FitsToWCSOpenGLTransform::toogleWcs(bool use) {
+	if (wcs_.isUsingWcs() == use) return;
+	wcs_.setUseWcs(use);
 }
