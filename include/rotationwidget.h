@@ -29,11 +29,11 @@
 class RotationWidget: public QWidget {
 private:
 	SpinboxWithSlider* spinbox_with_slider_;
-	std::unique_ptr<QCheckBox> wcs_checkBox_;
+	QCheckBox* wcs_checkBox_;
 public:
 	explicit RotationWidget(QWidget *parent = Q_NULLPTR);
 	inline ScientificSpinBox* spinbox() { return spinbox_with_slider_->spinbox(); }
-	inline const QCheckBox* wcsCheckBox() const { return wcs_checkBox_.get(); }
+	inline QCheckBox* wcsCheckBox() { return wcs_checkBox_; }
 };
 
 #endif //_ROTATIONWIDGET_H
