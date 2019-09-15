@@ -122,7 +122,7 @@ FITS::HeaderUnit FITS::HeaderUnit::createFromPages(AbstractFITSStorage::Page& be
 			if (comment != -1) {
 				value.resize(comment);
 			}
-			headers.emplace(key,value.trimmed());
+			headers.emplace(key,value.remove('\'').trimmed());
 		}
 	}
 
