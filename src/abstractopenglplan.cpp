@@ -55,8 +55,10 @@ bool AbstractOpenGLPlan::VAODrawer::initialize(AbstractOpenGLPlan& plan) const {
 
 void AbstractOpenGLPlan::VAODrawer::draw(AbstractOpenGLPlan& plan) const {
 	QOpenGLVertexArrayObject::Binder binder(&plan.vao_);
+    
+    int size = plan.plane_.vertexCoordBuffer().size();
 
-	plan.glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+	plan.glDrawArrays(GL_TRIANGLE_FAN, 0, size);
 }
 
 const AbstractOpenGLPlan::SimpleDrawer AbstractOpenGLPlan::simple_drawer;
