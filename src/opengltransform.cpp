@@ -41,7 +41,7 @@ void OpenGLTransform::updateTransform() const {
 
 	matrix_.setToIdentity();
 	matrix_.ortho(QRectF{viewrect_.left(), -viewrect_.top(), viewrect_.width(), -viewrect_.height()});
-	matrix_.rotate(angle_, static_cast<float>(0), static_cast<float>(0), static_cast<float>(1));
+	matrix_.rotate(angle_, 0.f, 0.f, 1.f);
 	matrix_.scale(h_flip_ ? -1 : 1, v_flip_ ? -1 : 1);
 
 	expired_ = false;
@@ -102,17 +102,17 @@ void WidgetToFitsOpenGLTransform::updateTransform() const {
 	matrix_.scale(image_size_.width(), image_size_.height());
 
 	/* world to plane */
-	matrix_.translate(static_cast<float>(0.5), static_cast<float>(0.5));
-	matrix_.scale(static_cast<float>(0.5)/(scale_*image_size_.width()),
-		static_cast<float>(0.5)/(scale_*image_size_.height()));
+	matrix_.translate(0.5f, 0.5f);
+	matrix_.scale(0.5f / (scale_*image_size_.width()),
+		0.5f / (scale_*image_size_.height()));
 
 	/* flip */
 	matrix_.scale(h_flip_ ? -1 : 1, v_flip_ ? -1 : 1);
 	/* world unrotated */
-	matrix_.rotate(-angle_, static_cast<float>(0), static_cast<float>(0), static_cast<float>(1));
+	matrix_.rotate(-angle_, 0.f, 0.f, 1.f);
 	/* viewrect to world */
 	matrix_.translate(viewrect_.center().x(), -viewrect_.center().y());
-	matrix_.scale(viewrect_.width()/static_cast<float>(2), -viewrect_.height()/static_cast<float>(2));
+	matrix_.scale(viewrect_.width() / 2.f, -viewrect_.height() / 2.f);
 
 	/* widget pixel (0,0, w,h) to viewrect (-1,-1, 2,2)*/
 	const auto widget_width = widget_size_.width();
@@ -120,7 +120,7 @@ void WidgetToFitsOpenGLTransform::updateTransform() const {
 	const float tr_x = -static_cast<float>(widget_width-1) / static_cast<float>(widget_width);
 	const float tr_y = -static_cast<float>(widget_height-1) / static_cast<float>(widget_height);
 	matrix_.translate(tr_x, tr_y);
-	matrix_.scale(static_cast<float>(2)/widget_width, static_cast<float>(2)/widget_height);
+	matrix_.scale(2.f / widget_width, 2.f / widget_height);
 
 	expired_ = false;
 }
@@ -148,5 +148,5 @@ void WidgetToFitsOpenGLTransform::setWidgetSize(const QSize& widget_size) {
 
 void FitsToWCSOpenGLTransform::toogleWcs(bool use) {
 	if (wcs_.isUsingWcs() == use) return;
-	wcs_.setUseWcs(use);
+    wcs_.setUseWcs(use);
 }

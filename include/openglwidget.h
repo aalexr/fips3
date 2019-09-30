@@ -132,7 +132,7 @@ public:
 	inline QSize image_size() const { return hdu_->data().imageDataUnit()->size(); }
 	void setHDU(const FITS::AbstractHeaderDataUnit& hdu);
 	Pixel pixelFromWidgetCoordinate(const QPoint &widget_coord);
-
+	QPair<Pixel, QPointF> posFromWidgetCoordinate(const QPoint &widget_coord);
 private:
 	const FITS::AbstractHeaderDataUnit* hdu_;
 	openGL_unique_ptr<AbstractOpenGLPlan> plan_;

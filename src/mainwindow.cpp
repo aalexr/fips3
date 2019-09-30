@@ -43,7 +43,10 @@ bool MouseMoveEventFilter::eventFilter(QObject* open_gl_widget, QEvent* event) {
 	switch (event->type()) {
 		case QEvent::MouseMove: {
 			auto mouse_event = static_cast<QMouseEvent *>(event);
-			mouse_position_widget_->setPositionAndValue(watched->pixelFromWidgetCoordinate(mouse_event->pos()));
+			////mouse_position_widget_->setPositionAndValue(watched->pixelFromWidgetCoordinate(mouse_event->pos()));
+			const auto& p = watched->posFromWidgetCoordinate(mouse_event->pos());
+			mouse_position_widget_->setPositionAndValue(p.first, p.second);
+
 			return true;
 		}
 		default:

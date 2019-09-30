@@ -108,7 +108,7 @@ OpenGLWidget::OpenGLWidget(QWidget *parent, const FITS::AbstractHeaderDataUnit& 
 		openGL_unique_ptr<OpenGLColorMap>(new PurpleBlueColorMap(), colormap_deleter_type(this)),
 	}},
 	colormap_index_(0) {
-
+	
 	connect(&viewrect_, SIGNAL(viewChanged(const QRectF&)), this, SLOT(viewChanged(const QRectF&)));
 	connect(&viewrect_, SIGNAL(scrollChanged(const QRect&)), this, SLOT(update()));
 	connect(this, SIGNAL(rotationChanged(double)), this, SLOT(update()));
@@ -242,6 +242,21 @@ Pixel OpenGLWidget::pixelFromWidgetCoordinate(const QPoint &widget_coord) {
 	const auto& header = hdu_->header();
 	const auto value = header.bscale() * hdu_->data().apply(HDUValueGetter{position}) + header.bzero();
 	return Pixel(QPoint{(int)wcs_vector.x(), (int)wcs_vector.y()}, value);
+}
+
+QPair<Pixel, QPointF> OpenGLWidget::posFromWidgetCoordinate(const QPoint &widget_coord) {
+	const auto p = widget_to_fits_.transform(widget_coord.x(), widget_coord.y());
+	const QPoint position(p.x(), p.y());
+
+	const bool inside_image = QRect({ 0, 0 }, image_size()).contains(position);
+	if (!inside_image) {
+		return qMakePair(Pixel{ position }, QPointF{});
+	}
+
+	const auto wcs_vector = fits_to_wcs_.transform(p);
+	const auto& header = hdu_->header();
+	const auto value = header.bscale() * hdu_->data().apply(HDUValueGetter{ position }) + header.bzero();
+	return qMakePair(Pixel{ position, value }, QPointF{ wcs_vector.x(), wcs_vector.y() });
 }
 
 void OpenGLWidget::viewChanged(const QRectF& view_rect) {

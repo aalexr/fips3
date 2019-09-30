@@ -6,9 +6,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_CXX_STANDARD 11)
 
-find_package(Qt5Core REQUIRED)
-find_package(Qt5Widgets REQUIRED)
-find_package(Qt5Test REQUIRED)
+find_package(Qt5 COMPONENTS Core Widgets Test REQUIRED)
 
 if(Qt5Widgets_VERSION VERSION_LESS 5.5)
 	message(FATAL_ERROR "Qt5 5.5 or later is required")
@@ -89,7 +87,7 @@ if(APPLE)
 	endif(${CMAKE_VERSION} VERSION_LESS 3.9.0)
 	add_custom_command(TARGET ${TARGET}
 		POST_BUILD
-		COMMAND macdeployqt ARGS ${BUNDLE_DIR} -always-overwrite
+		COMMAND /Users/alexander/Qt/5.12.5/clang_64/bin/macdeployqt ARGS ${BUNDLE_DIR} -always-overwrite
 		WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
 
 	install(TARGETS ${TARGET} BUNDLE DESTINATION .)

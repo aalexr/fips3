@@ -20,7 +20,7 @@
 #define _OPENGLTRANSFORM_H
 
 #include <abstractopengltransform.h>
-#include <include\wcsdata.h>
+#include <wcsdata.h>
 
 class OpenGLTransform:
 	public AbstractOpenGLTransform {

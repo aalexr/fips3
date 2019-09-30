@@ -43,7 +43,8 @@ public:
 	inline Optional(): empty_(true) {
 	};
 	Optional(const Optional& other) {
-		emplace(*other);
+		if (!other.empty_)
+			emplace(*other);
 	}
 	Optional(Optional&& other) {
 		emplace(std::move(*other));

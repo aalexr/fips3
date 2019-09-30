@@ -38,10 +38,14 @@ private:
 	QLabel* x_position_;
 	QLabel* y_position_;
 	QLabel* value_;
+
+	QLabel* alpha_position_;
+	QLabel* beta_position_;
 public:
 	MousePositionWidget(QWidget* parent = Q_NULLPTR);
 
 	void setPositionAndValue(const Pixel &pixel);
+	void setPositionAndValue(const Pixel& pixel, const QPointF& pos);
 };
 
 #endif //_MOUSEPOSITIONWIDGET_H

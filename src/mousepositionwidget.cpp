@@ -22,6 +22,8 @@ MousePositionWidget::MousePositionWidget(QWidget *parent):
 	QWidget(parent),
 	x_position_(new QLabel(this)),
 	y_position_(new QLabel(this)),
+	alpha_position_{ new QLabel{this} },
+	beta_position_{ new QLabel{this} },
 	value_(new QLabel(this)) {
 
 	x_position_->setAlignment(Qt::AlignRight);
@@ -37,6 +39,12 @@ MousePositionWidget::MousePositionWidget(QWidget *parent):
 	value_->setFixedWidth(value_text_width);
 
 	std::unique_ptr<QHBoxLayout> widget_layout{new QHBoxLayout(this)};
+
+	widget_layout->addWidget(new QLabel{tr("a: "), this});
+	widget_layout->addWidget(alpha_position_);
+
+	widget_layout->addWidget(new QLabel{ tr("b: "), this });
+	widget_layout->addWidget(beta_position_);
 
 	auto x_label = new QLabel(tr("x:"), this);
 	widget_layout->addWidget(x_label);
@@ -58,6 +66,16 @@ void MousePositionWidget::setPositionAndValue(const Pixel& pixel) {
 		x_position_->setText(locale().toString(pixel.position.x()));
 		y_position_->setText(locale().toString(pixel.position.y()));
 		value_->setText(locale().toString(pixel.value.value(), text_format_, decimals_));
+	}
+}
+
+void MousePositionWidget::setPositionAndValue(const Pixel& pixel, const QPointF& pos) {
+	if (pixel.value) {
+		x_position_->setText(locale().toString(pixel.position.x()));
+		y_position_->setText(locale().toString(pixel.position.y()));
+		alpha_position_->setText(locale().toString(pos.x()));
+		beta_position_->setText(locale().toString(pos.y()));
+		value_->setText(locale().toString(*pixel.value, text_format_, decimals_));
 	}
 }
 
