@@ -41,6 +41,7 @@ public:
 
 	void setVertexCoordAttribPointer(QOpenGLBuffer& buffer);
 	void setVertexUVAttribPointer(QOpenGLBuffer& buffer);
+	void setIndexAttribPointer(QOpenGLBuffer& buffer);
 
 	virtual bool link() override;
 
@@ -50,6 +51,7 @@ public:
 	static constexpr const int vertex_UV_index = 1;
 	static constexpr const int image_texture_index = 0;
 	static constexpr const int colormap_texture_index = 1;
+	static constexpr const int indices_index = 2;
 };
 
 #endif // _OPENGLSHADERPROGRAM_H

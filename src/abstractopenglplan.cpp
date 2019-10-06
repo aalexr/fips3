@@ -49,16 +49,16 @@ bool AbstractOpenGLPlan::VAODrawer::initialize(AbstractOpenGLPlan& plan) const {
 
 	plan.program_.setVertexCoordAttribPointer(plan.plane_.vertexCoordBuffer());
 	plan.program_.setVertexUVAttribPointer(plan.plane_.vertexUVBuffer());
+	plan.program_.setIndexAttribPointer(plan.plane_.indexBuffer());
 
 	return true;
 }
 
 void AbstractOpenGLPlan::VAODrawer::draw(AbstractOpenGLPlan& plan) const {
 	QOpenGLVertexArrayObject::Binder binder(&plan.vao_);
-    
-    int size = plan.plane_.vertexCoordBuffer().size();
 
-	plan.glDrawArrays(GL_TRIANGLE_FAN, 0, size);
+	// Passing Q_NULLPTR because index buffer was bound
+	plan.glDrawElements(GL_TRIANGLE_STRIP, plan.plane().indexBuffer().size() / sizeof(unsigned int), GL_UNSIGNED_INT, Q_NULLPTR);
 }
 
 const AbstractOpenGLPlan::SimpleDrawer AbstractOpenGLPlan::simple_drawer;

@@ -25,6 +25,7 @@
 #include <QOpenGLShaderProgram>
 
 #include <array>
+#include <cmath>
 
 #include "openglshaderprogram.h"
 
@@ -32,19 +33,29 @@ class OpenGLPlane: public QObject {
 private:
 	QOpenGLBuffer vertex_buffer_;
 	QOpenGLBuffer UV_buffer_;
+	QOpenGLBuffer index_buffer_;
 
 	QSize image_size_;
 	qreal scale_;
 
-	std::array<float, 8> vertices_;
+	static constexpr const int VERTICES_PER_SIDE = 16;
 
-	void updateVertexArray();
+	std::vector<float> mesh_;
+	std::vector<float> uv_;
+	std::vector<unsigned int> indices_;
+
+	void updateVertexArray(const QRectF& p, int nx, int ny);
 	void updateScale();
+	void updateUV(int nx, int ny);
 	void setImageSize(const QSize& image_size);
+
+	void updateIndices(int width, int height);
 
 	bool initializeBufferHelper(QOpenGLBuffer& buffer, const void* data, int count, GLuint index);
 	bool initializeVertexBuffer();
 	bool initializeUVBuffer();
+	bool initializeIndexBuffer();
+
 public:
 	OpenGLPlane(const QSize& image_size, QObject* parent = Q_NULLPTR);
 	virtual ~OpenGLPlane() override;
@@ -58,16 +69,10 @@ public:
 	inline QOpenGLBuffer&       vertexCoordBuffer()       { return vertex_buffer_; }
 	inline const QOpenGLBuffer& vertexUVBuffer() const { return UV_buffer_; }
 	inline QOpenGLBuffer&       vertexUVBuffer()       { return UV_buffer_; }
+	inline QOpenGLBuffer& indexBuffer() { return index_buffer_; }
+	inline const QOpenGLBuffer& indexBuffer() const { return index_buffer_; }
 
 	bool initialize();
-public:
-	// UV coordinates for triangle fan. See vertex_data_
-	static constexpr const GLfloat uv_data[] = {
-			0.0f, 0.0f,
-			0.0f, 1.0f,
-			1.0f, 1.0f,
-			1.0f, 0.0f
-	};
 };
 
 #endif // _OPENGLPLANE_H

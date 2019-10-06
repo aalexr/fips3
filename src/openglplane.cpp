@@ -25,10 +25,13 @@
 
 OpenGLPlane::OpenGLPlane(const QSize& image_size, QObject* parent):
 	QObject(parent),
+	mesh_(),
+	uv_(),
+	indices_(),
 	scale_{0},
-	vertices_{},
 	vertex_buffer_(QOpenGLBuffer::VertexBuffer),
-	UV_buffer_(QOpenGLBuffer::VertexBuffer) {
+	UV_buffer_(QOpenGLBuffer::VertexBuffer),
+	index_buffer_(QOpenGLBuffer::IndexBuffer) {
 
 	setImageSize(image_size);
 }
@@ -45,20 +48,15 @@ void OpenGLPlane::updateScale() {
 	scale_ = scale;
 }
 
-void OpenGLPlane::updateVertexArray() {
-	const auto p = planeRect();
-
-	vertices_[0] = p.left();
-	vertices_[1] = p.top();
-
-	vertices_[2] = p.left();
-	vertices_[3] = p.bottom();
-
-	vertices_[4] = p.right();
-	vertices_[5] = p.bottom();
-
-	vertices_[6] = p.right();
-	vertices_[7] = p.top();
+void OpenGLPlane::updateVertexArray(const QRectF& p, int nx, int ny) {
+	mesh_.clear();
+	qreal dx = p.width() / (nx - 1), dy = p.height() / (ny - 1);
+	for (auto i = 0; i < ny; ++i) {
+		for (auto j = 0; j < nx; ++j) {
+			mesh_.push_back(p.x() + i * dx);
+			mesh_.push_back(p.y() + j * dy);
+		}
+	}
 }
 
 void OpenGLPlane::setImageSize(const QSize& image_size) {
@@ -66,8 +64,17 @@ void OpenGLPlane::setImageSize(const QSize& image_size) {
 
 	image_size_ = image_size;
 
+	const auto p = planeRect();
+	qreal w = p.width();
+	qreal h = p.height();
+	qreal delta = std::max(w, h) / static_cast<qreal>(VERTICES_PER_SIDE - 1);
+	int nx = std::ceil(w / delta + 1);
+	int ny = std::ceil(h / delta + 1);
+
 	updateScale();
-	updateVertexArray();
+	updateVertexArray(p, nx, ny);
+	updateUV(nx, ny);
+	updateIndices(nx, ny);
 }
 
 QRectF OpenGLPlane::planeRect() const {
@@ -91,7 +98,7 @@ QRectF OpenGLPlane::borderRect(float angle) const {
 }
 
 bool OpenGLPlane::initializeBufferHelper(QOpenGLBuffer& buffer, const void* data, int count, GLuint index) {
-	Q_ASSERT(&buffer == &vertex_buffer_ || &buffer == &UV_buffer_);
+	Q_ASSERT(&buffer == &vertex_buffer_ || &buffer == &UV_buffer_ || &buffer == &index_buffer_);
 
 	if (!buffer.create()) {
 		return false;
@@ -106,12 +113,15 @@ bool OpenGLPlane::initializeBufferHelper(QOpenGLBuffer& buffer, const void* data
 }
 
 bool OpenGLPlane::initializeVertexBuffer() {
-	return initializeBufferHelper(vertex_buffer_, vertices_.data(), sizeof(float) * vertices_.size(), OpenGLShaderProgram::vertex_coord_index);
+	return initializeBufferHelper(vertex_buffer_, mesh_.data(), sizeof(float) * mesh_.size(), OpenGLShaderProgram::vertex_coord_index);
 }
 
 bool OpenGLPlane::initializeUVBuffer() {
-	return initializeBufferHelper(UV_buffer_, OpenGLPlane::uv_data, sizeof(OpenGLPlane::uv_data), OpenGLShaderProgram::vertex_UV_index);
+	return initializeBufferHelper(UV_buffer_, OpenGLPlane::uv_.data(), sizeof(float) * OpenGLPlane::uv_.size(), OpenGLShaderProgram::vertex_UV_index);
+}
 
+bool OpenGLPlane::initializeIndexBuffer() {
+	return initializeBufferHelper(index_buffer_, indices_.data(), sizeof(unsigned int) * indices_.size(), OpenGLShaderProgram::indices_index);
 }
 
 bool OpenGLPlane::initialize() {
@@ -122,7 +132,49 @@ bool OpenGLPlane::initialize() {
 		return false;
 	}
 
+	if (!initializeIndexBuffer()) {
+		return false;
+	}
+
 	return true;
 }
 
-constexpr const GLfloat OpenGLPlane::uv_data[];
+void OpenGLPlane::updateUV(int nx, int ny) {
+	uv_.clear();
+	float dx = 1.f / (nx - 1), dy = 1.f / (nx - 1);
+
+	for (float x = 0.f; x <= 1.f; x += dx) {
+		for (float y = 0.f; y <= 1.f; y += dy) {
+			uv_.push_back(x);
+			uv_.push_back(y);
+		}
+	}
+}
+
+void OpenGLPlane::updateIndices(int width, int height) {
+	indices_.clear();
+
+	for (auto row = 0U; row < height - 1; ++row) {
+		// Repeat first element of the next row to create degenerate triangle
+		// Do not do this for the first row
+
+		if (row != 0U) {
+			indices_.push_back(row * width);
+		}
+
+		for (auto column = 0U; column < width; ++column) {
+			indices_.push_back(column + row * width);
+			indices_.push_back(column + (row + 1) * width);
+		}
+
+		// Repeat last element of the current row to create degenerate triangle
+		// Do not do this for the last row
+
+		if (row != height - 2) {
+			indices_.push_back(*(indices_.end() - 1));
+		}
+	}
+
+}
+
+constexpr const int OpenGLPlane::VERTICES_PER_SIDE;

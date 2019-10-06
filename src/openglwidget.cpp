@@ -149,7 +149,7 @@ void OpenGLWidget::initializeGLObjects() {
 	
 	emit wcsSupported(fits_to_wcs_.wcs().isUsingWcs());
 	
-	setRotation(fits_to_wcs_.wcs().rotationAngle());
+	//setRotation(fits_to_wcs_.wcs().rotationAngle());
 
 	emit planInitialized(*plan_);
 

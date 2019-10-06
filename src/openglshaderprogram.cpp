@@ -59,6 +59,10 @@ void OpenGLShaderProgram::setVertexUVAttribPointer(QOpenGLBuffer& buffer) {
 	setAttribPointerHelper(buffer, vertex_UV_index);
 }
 
+void OpenGLShaderProgram::setIndexAttribPointer(QOpenGLBuffer& buffer) {
+	setAttribPointerHelper(buffer, indices_index);
+}
+
 bool OpenGLShaderProgram::link() {
 	bindAttributeLocation(vertex_coord_name, vertex_coord_index);
 	bindAttributeLocation(vertex_UV_name, vertex_UV_index);
