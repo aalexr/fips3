@@ -227,14 +227,20 @@ template<class T>
 QString AbstractOpenGL33Plan<T>::vertexShaderSourceCode() const {
 	static const QString source = R"(
 		#version 330
-
+		#define PI 3.14159265358979323846264338327
+		
 		in vec2 vertexCoord;
 		in vec2 vertexUV;
 		out vec2 UV;
 		uniform mat4 MVP;
 
-		void main() {
-			gl_Position = MVP * vec4(vertexCoord,0,1);
+		void main() {			
+			float theta = atan(length(vertexCoord));
+			float phi = atan(-vertexCoord.y, vertexCoord.x);
+			float x = theta * cos(phi) / PI;
+			float y = theta * sin(phi) / PI;
+			
+			gl_Position = MVP * vec4(y, x, 0,1);
 			UV = vertexUV;
 		}
 	)";

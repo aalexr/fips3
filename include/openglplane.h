@@ -38,7 +38,7 @@ private:
 	QSize image_size_;
 	qreal scale_;
 
-	static constexpr const int VERTICES_PER_SIDE = 16;
+	static constexpr const int VERTICES_PER_SIDE = 32;
 
 	std::vector<float> mesh_;
 	std::vector<float> uv_;
